@@ -2,11 +2,10 @@
 /**
  * This file is part of Notadd.
  *
- * @author TwilRoad <heshudong@ibenchu.com>
+ * @author        TwilRoad <heshudong@ibenchu.com>
  * @copyright (c) 2016, notadd.com
- * @datetime 2016-10-25 11:59
+ * @datetime      2016-10-25 11:59
  */
-
 namespace Notadd\Foundation\Testing;
 
 use Illuminate\Database\Eloquent\Model;

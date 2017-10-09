@@ -19,14 +19,21 @@ use Notadd\Foundation\Testing\Concerns\InteractsWithDatabase;
 use Notadd\Foundation\Testing\Concerns\InteractsWithSession;
 use Notadd\Foundation\Testing\Concerns\MakesHttpRequests;
 use Notadd\Foundation\Testing\Concerns\MocksApplicationServices;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase as BaseTestCase;
 
 /**
  * Class TestCase.
  */
-abstract class TestCase extends PHPUnit_Framework_TestCase
+abstract class TestCase extends BaseTestCase
 {
-    use InteractsWithContainer, MakesHttpRequests, ImpersonatesUsers, InteractsWithAuthentication, InteractsWithConsole, InteractsWithDatabase, InteractsWithSession, MocksApplicationServices;
+    use InteractsWithContainer,
+        MakesHttpRequests,
+        ImpersonatesUsers,
+        InteractsWithAuthentication,
+        InteractsWithConsole,
+        InteractsWithDatabase,
+        InteractsWithSession,
+        MocksApplicationServices;
 
     /**
      * The Illuminate application instance.

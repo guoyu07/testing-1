@@ -2,9 +2,9 @@
 /**
  * This file is part of Notadd.
  *
- * @author TwilRoad <heshudong@ibenchu.com>
- * @copyright (c) 2016, notadd.com
- * @datetime 2016-10-25 11:29
+ * @author        TwilRoad <heshudong@ibenchu.com>
+ * @copyright (c) 2017, notadd.com
+ * @datetime      2017-10-09 18:27
  */
 namespace Notadd\Foundation\Testing;
 
@@ -25,7 +25,7 @@ trait WithoutMiddleware
         if (method_exists($this, 'withoutMiddleware')) {
             $this->withoutMiddleware();
         } else {
-            throw new Exception('Unable to disable middleware. CrawlerTrait not used.');
+            throw new Exception('Unable to disable middleware. MakesHttpRequests trait not used.');
         }
     }
 }

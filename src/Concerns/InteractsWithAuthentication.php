@@ -2,17 +2,48 @@
 /**
  * This file is part of Notadd.
  *
- * @author TwilRoad <heshudong@ibenchu.com>
- * @copyright (c) 2016, notadd.com
- * @datetime 2016-10-25 11:33
+ * @author        TwilRoad <heshudong@ibenchu.com>
+ * @copyright (c) 2017, notadd.com
+ * @datetime      2017-10-09 18:43
  */
 namespace Notadd\Foundation\Testing\Concerns;
 
+use Illuminate\Contracts\Auth\Authenticatable as UserContract;
+
 /**
- * Class InteractsWithAuthentication.
+ * Trait InteractsWithAuthentication.
  */
 trait InteractsWithAuthentication
 {
+    /**
+     * Set the currently logged in user for the application.
+     *
+     * @param \Illuminate\Contracts\Auth\Authenticatable $user
+     * @param string|null                                $driver
+     *
+     * @return $this
+     */
+    public function actingAs(UserContract $user, $driver = null)
+    {
+        $this->be($user, $driver);
+
+        return $this;
+    }
+
+    /**
+     * Set the currently logged in user for the application.
+     *
+     * @param \Illuminate\Contracts\Auth\Authenticatable $user
+     * @param string|null                                $driver
+     *
+     * @return void
+     */
+    public function be(UserContract $user, $driver = null)
+    {
+        $this->app['auth']->guard($driver)->setUser($user);
+        $this->app['auth']->shouldUse($driver);
+    }
+
     /**
      * Assert that the user is authenticated.
      *
@@ -20,7 +51,7 @@ trait InteractsWithAuthentication
      *
      * @return $this
      */
-    public function seeIsAuthenticated($guard = null)
+    public function assertAuthenticated($guard = null)
     {
         $this->assertTrue($this->isAuthenticated($guard), 'The user is not authenticated');
 
@@ -34,7 +65,7 @@ trait InteractsWithAuthentication
      *
      * @return $this
      */
-    public function dontSeeIsAuthenticated($guard = null)
+    public function assertGuest($guard = null)
     {
         $this->assertFalse($this->isAuthenticated($guard), 'The user is authenticated');
 
@@ -61,13 +92,17 @@ trait InteractsWithAuthentication
      *
      * @return $this
      */
-    public function seeIsAuthenticatedAs($user, $guard = null)
+    public function assertAuthenticatedAs($user, $guard = null)
     {
         $expected = $this->app->make('auth')->guard($guard)->user();
-        $this->assertInstanceOf(get_class($expected), $user,
-            'The currently authenticated user is not who was expected');
-        $this->assertSame($expected->getAuthIdentifier(), $user->getAuthIdentifier(),
-            'The currently authenticated user is not who was expected');
+        $this->assertInstanceOf(
+            get_class($expected), $user,
+            'The currently authenticated user is not who was expected'
+        );
+        $this->assertSame(
+            $expected->getAuthIdentifier(), $user->getAuthIdentifier(),
+            'The currently authenticated user is not who was expected'
+        );
 
         return $this;
     }
@@ -80,9 +115,11 @@ trait InteractsWithAuthentication
      *
      * @return $this
      */
-    public function seeCredentials(array $credentials, $guard = null)
+    public function assertCredentials(array $credentials, $guard = null)
     {
-        $this->assertTrue($this->hasCredentials($credentials, $guard), 'The given credentials are invalid.');
+        $this->assertTrue(
+            $this->hasCredentials($credentials, $guard), 'The given credentials are invalid.'
+        );
 
         return $this;
     }
@@ -95,15 +132,17 @@ trait InteractsWithAuthentication
      *
      * @return $this
      */
-    public function dontSeeCredentials(array $credentials, $guard = null)
+    public function assertInvalidCredentials(array $credentials, $guard = null)
     {
-        $this->assertFalse($this->hasCredentials($credentials, $guard), 'The given credentials are valid.');
+        $this->assertFalse(
+            $this->hasCredentials($credentials, $guard), 'The given credentials are valid.'
+        );
 
         return $this;
     }
 
     /**
-     * Return true is the credentials are valid, false otherwise.
+     * Return true if the credentials are valid, false otherwise.
      *
      * @param array       $credentials
      * @param string|null $guard

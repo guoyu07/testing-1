@@ -2,9 +2,9 @@
 /**
  * This file is part of Notadd.
  *
- * @author TwilRoad <heshudong@ibenchu.com>
- * @copyright (c) 2016, notadd.com
- * @datetime 2016-10-25 11:30
+ * @author        TwilRoad <heshudong@ibenchu.com>
+ * @copyright (c) 2017, notadd.com
+ * @datetime      2017-10-09 18:32
  */
 namespace Notadd\Foundation\Testing;
 
@@ -25,7 +25,7 @@ trait WithoutEvents
         if (method_exists($this, 'withoutEvents')) {
             $this->withoutEvents();
         } else {
-            throw new Exception('Unable to disable middleware. ApplicationTrait not used.');
+            throw new Exception('Unable to disable events. ApplicationTrait not used.');
         }
     }
 }

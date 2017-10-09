@@ -3,22 +3,16 @@
  * This file is part of Notadd.
  *
  * @author        TwilRoad <heshudong@ibenchu.com>
- * @copyright (c) 2016, notadd.com
- * @datetime      2016-10-25 11:59
+ * @copyright (c) 2017, notadd.com
+ * @datetime      2017-10-09 18:58
  */
 namespace Notadd\Foundation\Testing;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Facade;
 use Mockery;
-use Notadd\Foundation\Testing\Concerns\ImpersonatesUsers;
-use Notadd\Foundation\Testing\Concerns\InteractsWithAuthentication;
-use Notadd\Foundation\Testing\Concerns\InteractsWithConsole;
-use Notadd\Foundation\Testing\Concerns\InteractsWithContainer;
-use Notadd\Foundation\Testing\Concerns\InteractsWithDatabase;
-use Notadd\Foundation\Testing\Concerns\InteractsWithSession;
-use Notadd\Foundation\Testing\Concerns\MakesHttpRequests;
-use Notadd\Foundation\Testing\Concerns\MocksApplicationServices;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Facade;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Console\Application as Artisan;
 use PHPUnit\Framework\TestCase as BaseTestCase;
 
 /**
@@ -26,14 +20,14 @@ use PHPUnit\Framework\TestCase as BaseTestCase;
  */
 abstract class TestCase extends BaseTestCase
 {
-    use InteractsWithContainer,
-        MakesHttpRequests,
-        ImpersonatesUsers,
-        InteractsWithAuthentication,
-        InteractsWithConsole,
-        InteractsWithDatabase,
-        InteractsWithSession,
-        MocksApplicationServices;
+    use Concerns\InteractsWithContainer,
+        Concerns\MakesHttpRequests,
+        Concerns\InteractsWithAuthentication,
+        Concerns\InteractsWithConsole,
+        Concerns\InteractsWithDatabase,
+        Concerns\InteractsWithExceptionHandling,
+        Concerns\InteractsWithSession,
+        Concerns\MocksApplicationServices;
 
     /**
      * The Illuminate application instance.
@@ -65,6 +59,7 @@ abstract class TestCase extends BaseTestCase
 
     /**
      * Creates the application.
+     *
      * Needs to be implemented by subclasses.
      *
      * @return \Symfony\Component\HttpKernel\HttpKernelInterface
@@ -97,18 +92,20 @@ abstract class TestCase extends BaseTestCase
      */
     protected function refreshApplication()
     {
-        putenv('APP_ENV=testing');
         $this->app = $this->createApplication();
     }
 
     /**
      * Boot the testing helper traits.
      *
-     * @return void
+     * @return array
      */
     protected function setUpTraits()
     {
         $uses = array_flip(class_uses_recursive(static::class));
+        if (isset($uses[RefreshDatabase::class])) {
+            $this->refreshDatabase();
+        }
         if (isset($uses[DatabaseMigrations::class])) {
             $this->runDatabaseMigrations();
         }
@@ -121,13 +118,14 @@ abstract class TestCase extends BaseTestCase
         if (isset($uses[WithoutEvents::class])) {
             $this->disableEventsForAllTests();
         }
+
+        return $uses;
     }
 
     /**
      * Clean up the testing environment before the next test.
      *
      * @return void
-     * @throws \Exception
      */
     protected function tearDown()
     {
@@ -142,17 +140,27 @@ abstract class TestCase extends BaseTestCase
         if (property_exists($this, 'serverVariables')) {
             $this->serverVariables = [];
         }
+        if (property_exists($this, 'defaultHeaders')) {
+            $this->defaultHeaders = [];
+        }
         if (class_exists('Mockery')) {
+            if ($container = Mockery::getContainer()) {
+                $this->addToAssertionCount($container->mockery_getExpectationCount());
+            }
             Mockery::close();
+        }
+        if (class_exists(Carbon::class)) {
+            Carbon::setTestNow();
         }
         $this->afterApplicationCreatedCallbacks = [];
         $this->beforeApplicationDestroyedCallbacks = [];
+        Artisan::forgetBootstrappers();
     }
 
     /**
      * Register a callback to be run after the application is created.
      *
-     * @param callable $callback
+     * @param  callable $callback
      *
      * @return void
      */
@@ -167,7 +175,7 @@ abstract class TestCase extends BaseTestCase
     /**
      * Register a callback to be run before the application is destroyed.
      *
-     * @param callable $callback
+     * @param  callable $callback
      *
      * @return void
      */

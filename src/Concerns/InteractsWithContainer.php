@@ -2,17 +2,30 @@
 /**
  * This file is part of Notadd.
  *
- * @author TwilRoad <heshudong@ibenchu.com>
- * @copyright (c) 2016, notadd.com
- * @datetime 2016-10-25 11:34
+ * @author        TwilRoad <heshudong@ibenchu.com>
+ * @copyright (c) 2017, notadd.com
+ * @datetime      2017-10-09 18:45
  */
 namespace Notadd\Foundation\Testing\Concerns;
 
 /**
- * Class InteractsWithContainer.
+ * Trait InteractsWithContainer.
  */
 trait InteractsWithContainer
 {
+    /**
+     * Register an instance of an object in the container.
+     *
+     * @param string $abstract
+     * @param object $instance
+     *
+     * @return object
+     */
+    protected function swap($abstract, $instance)
+    {
+        return $this->instance($abstract, $instance);
+    }
+
     /**
      * Register an instance of an object in the container.
      *

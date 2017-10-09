@@ -2,19 +2,19 @@
 /**
  * This file is part of Notadd.
  *
- * @author TwilRoad <heshudong@ibenchu.com>
- * @copyright (c) 2016, notadd.com
- * @datetime 2016-10-25 11:42
+ * @author        TwilRoad <heshudong@ibenchu.com>
+ * @copyright (c) 2017, notadd.com
+ * @datetime      2017-10-09 18:55
  */
 namespace Notadd\Foundation\Testing\Concerns;
 
-use Exception;
-use Illuminate\Contracts\Notifications\Dispatcher as NotificationDispatcher;
-use Illuminate\Database\Eloquent\Model;
 use Mockery;
+use Illuminate\Contracts\Bus\Dispatcher as BusDispatcherContract;
+use Illuminate\Contracts\Events\Dispatcher as EventsDispatcherContract;
+use Illuminate\Contracts\Notifications\Dispatcher as NotificationDispatcher;
 
 /**
- * Class MocksApplicationServices.
+ * Trait MocksApplicationServices.
  */
 trait MocksApplicationServices
 {
@@ -48,12 +48,14 @@ trait MocksApplicationServices
 
     /**
      * Specify a list of events that should be fired for the given operation.
+     *
      * These events will be mocked, so that handlers will not actually be executed.
      *
      * @param array|string $events
      *
-     * @throws \Exception
      * @return $this
+     *
+     * @throws \Exception
      */
     public function expectsEvents($events)
     {
@@ -61,9 +63,10 @@ trait MocksApplicationServices
         $this->withoutEvents();
         $this->beforeApplicationDestroyed(function () use ($events) {
             $fired = $this->getFiredEvents($events);
-            if ($eventsNotFired = array_diff($events, $fired)) {
-                throw new Exception('These expected events were not fired: [' . implode(', ', $eventsNotFired) . ']');
-            }
+            $this->assertEmpty(
+                $eventsNotFired = array_diff($events, $fired),
+                'These expected events were not fired: [' . implode(', ', $eventsNotFired) . ']'
+            );
         });
 
         return $this;
@@ -71,6 +74,7 @@ trait MocksApplicationServices
 
     /**
      * Specify a list of events that should not be fired for the given operation.
+     *
      * These events will be mocked, so that handlers will not actually be executed.
      *
      * @param array|string $events
@@ -82,9 +86,10 @@ trait MocksApplicationServices
         $events = is_array($events) ? $events : func_get_args();
         $this->withoutEvents();
         $this->beforeApplicationDestroyed(function () use ($events) {
-            if ($fired = $this->getFiredEvents($events)) {
-                throw new Exception('These unexpected events were fired: [' . implode(', ', $fired) . ']');
-            }
+            $this->assertEmpty(
+                $fired = $this->getFiredEvents($events),
+                'These unexpected events were fired: [' . implode(', ', $fired) . ']'
+            );
         });
 
         return $this;
@@ -97,119 +102,11 @@ trait MocksApplicationServices
      */
     protected function withoutEvents()
     {
-        $mock = Mockery::mock('Illuminate\Contracts\Events\Dispatcher');
-        $mock->shouldReceive('fire')->andReturnUsing(function ($called) {
+        $mock = Mockery::mock(EventsDispatcherContract::class);
+        $mock->shouldReceive('fire', 'dispatch')->andReturnUsing(function ($called) {
             $this->firedEvents[] = $called;
         });
         $this->app->instance('events', $mock);
-
-        return $this;
-    }
-
-    /**
-     * Specify a list of events that should be fired for the given operation.
-     * These events will be mocked, so that handlers will not actually be executed.
-     *
-     * @param string       $model
-     * @param array|string $events
-     *
-     * @throws \Exception
-     * @return $this
-     */
-    public function expectsModelEvents($model, $events)
-    {
-        $events = $this->formatModelEvents($model, $events);
-        $this->withoutModelEvents();
-        $this->beforeApplicationDestroyed(function () use ($events) {
-            $fired = $this->getFiredModelEvents($events);
-            if ($eventsNotFired = array_diff($events, $fired)) {
-                throw new Exception('These expected Eloquent events were not fired: [' . implode(', ',
-                        $eventsNotFired) . ']');
-            }
-        });
-
-        return $this;
-    }
-
-    /**
-     * Specify a list of events that should not be fired for the given operation.
-     * These events will be mocked, so that handlers will not actually be executed.
-     *
-     * @param string       $model
-     * @param array|string $events
-     *
-     * @throws \Exception
-     * @return $this
-     */
-    public function doesntExpectModelEvents($model, $events)
-    {
-        $events = $this->formatModelEvents($model, $events);
-        $this->withoutModelEvents();
-        $this->beforeApplicationDestroyed(function () use ($events) {
-            if ($fired = $this->getFiredModelEvents($events)) {
-                throw new Exception('These unexpected Eloquent events were fired: [' . implode(', ', $fired) . ']');
-            }
-        });
-
-        return $this;
-    }
-
-    /**
-     * Convert a model and a list of events into the Eloquent's format.
-     *
-     * @param string       $model
-     * @param array|string $events
-     *
-     * @return string[]
-     */
-    private function formatModelEvents($model, $events)
-    {
-        $events = (array)$events;
-
-        return array_map(function ($event) use ($model) {
-            return "eloquent.{$event}: {$model}";
-        }, (array)$events);
-    }
-
-    /**
-     * Mock the model event dispatcher so all Eloquent events are silenced.
-     *
-     * @return $this
-     */
-    protected function withoutModelEvents()
-    {
-        $mock = Mockery::mock('Illuminate\Contracts\Events\Dispatcher');
-        $mock->shouldReceive('fire')->andReturnUsing(function ($called) {
-            $this->firedModelEvents[] = $called;
-        });
-        $mock->shouldReceive('until')->andReturnUsing(function ($called) {
-            $this->firedModelEvents[] = $called;
-
-            return true;
-        });
-        $mock->shouldReceive('listen')->andReturnUsing(function ($event, $listener, $priority) {
-            //
-        });
-        Model::setEventDispatcher($mock);
-
-        return $this;
-    }
-
-    /**
-     * Specify a list of observers that will not run for the given operation.
-     *
-     * @param array|string $observers
-     *
-     * @return $this
-     */
-    public function withoutObservers($observers)
-    {
-        $observers = is_array($observers) ? $observers : [$observers];
-        array_map(function ($observer) {
-            $this->app->alias($observer, function () use ($observer) {
-                return $this->getMockBuilder($observer)->disableOriginalConstructor()->getMock();
-            });
-        }, $observers);
 
         return $this;
     }
@@ -227,19 +124,8 @@ trait MocksApplicationServices
     }
 
     /**
-     * Filter the given events against the fired events.
-     *
-     * @param array $events
-     *
-     * @return array
-     */
-    protected function getFiredModelEvents(array $events)
-    {
-        return $this->getDispatched($events, $this->firedModelEvents);
-    }
-
-    /**
      * Specify a list of jobs that should be dispatched for the given operation.
+     *
      * These jobs will be mocked, so that handlers will not actually be executed.
      *
      * @param array|string $jobs
@@ -252,10 +138,10 @@ trait MocksApplicationServices
         $this->withoutJobs();
         $this->beforeApplicationDestroyed(function () use ($jobs) {
             $dispatched = $this->getDispatchedJobs($jobs);
-            if ($jobsNotDispatched = array_diff($jobs, $dispatched)) {
-                throw new Exception('These expected jobs were not dispatched: [' . implode(', ',
-                        $jobsNotDispatched) . ']');
-            }
+            $this->assertEmpty(
+                $jobsNotDispatched = array_diff($jobs, $dispatched),
+                'These expected jobs were not dispatched: [' . implode(', ', $jobsNotDispatched) . ']'
+            );
         });
 
         return $this;
@@ -263,6 +149,7 @@ trait MocksApplicationServices
 
     /**
      * Specify a list of jobs that should not be dispatched for the given operation.
+     *
      * These jobs will be mocked, so that handlers will not actually be executed.
      *
      * @param array|string $jobs
@@ -274,9 +161,10 @@ trait MocksApplicationServices
         $jobs = is_array($jobs) ? $jobs : func_get_args();
         $this->withoutJobs();
         $this->beforeApplicationDestroyed(function () use ($jobs) {
-            if ($dispatched = $this->getDispatchedJobs($jobs)) {
-                throw new Exception('These unexpected jobs were dispatched: [' . implode(', ', $dispatched) . ']');
-            }
+            $this->assertEmpty(
+                $dispatched = $this->getDispatchedJobs($jobs),
+                'These unexpected jobs were dispatched: [' . implode(', ', $dispatched) . ']'
+            );
         });
 
         return $this;
@@ -289,11 +177,13 @@ trait MocksApplicationServices
      */
     protected function withoutJobs()
     {
-        $mock = Mockery::mock('Illuminate\Contracts\Bus\Dispatcher');
+        $mock = Mockery::mock(BusDispatcherContract::class);
         $mock->shouldReceive('dispatch', 'dispatchNow')->andReturnUsing(function ($dispatched) {
             $this->dispatchedJobs[] = $dispatched;
         });
-        $this->app->instance('Illuminate\Contracts\Bus\Dispatcher', $mock);
+        $this->app->instance(
+            BusDispatcherContract::class, $mock
+        );
 
         return $this;
     }
@@ -336,9 +226,8 @@ trait MocksApplicationServices
     protected function wasDispatched($needle, array $haystack)
     {
         foreach ($haystack as $dispatched) {
-            if ((is_string($dispatched) && ($dispatched === $needle || is_subclass_of($dispatched,
-                            $needle))) || $dispatched instanceof $needle
-            ) {
+            if ((is_string($dispatched) && ($dispatched === $needle || is_subclass_of($dispatched, $needle))) ||
+                $dispatched instanceof $needle) {
                 return true;
             }
         }
@@ -355,7 +244,9 @@ trait MocksApplicationServices
     {
         $mock = Mockery::mock(NotificationDispatcher::class);
         $mock->shouldReceive('send')->andReturnUsing(function ($notifiable, $instance, $channels = []) {
-            $this->dispatchedNotifications[] = compact('notifiable', 'instance', 'channels');
+            $this->dispatchedNotifications[] = compact(
+                'notifiable', 'instance', 'channels'
+            );
         });
         $this->app->instance(NotificationDispatcher::class, $mock);
 
@@ -376,11 +267,14 @@ trait MocksApplicationServices
         $this->beforeApplicationDestroyed(function () use ($notifiable, $notification) {
             foreach ($this->dispatchedNotifications as $dispatched) {
                 $notified = $dispatched['notifiable'];
-                if (($notified === $notifiable || $notified->getKey() == $notifiable->getKey()) && get_class($dispatched['instance']) === $notification) {
+                if (($notified === $notifiable ||
+                        $notified->getKey() == $notifiable->getKey()) &&
+                    get_class($dispatched['instance']) === $notification
+                ) {
                     return $this;
                 }
             }
-            throw new Exception('The following expected notification were not dispatched: [' . $notification . ']');
+            $this->fail('The following expected notification were not dispatched: [' . $notification . ']');
         });
 
         return $this;

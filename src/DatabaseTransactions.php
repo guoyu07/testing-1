@@ -2,14 +2,14 @@
 /**
  * This file is part of Notadd.
  *
- * @author TwilRoad <heshudong@ibenchu.com>
- * @copyright (c) 2016, notadd.com
- * @datetime 2016-10-25 11:31
+ * @author        TwilRoad <heshudong@ibenchu.com>
+ * @copyright (c) 2017, notadd.com
+ * @datetime      2017-10-09 18:41
  */
 namespace Notadd\Foundation\Testing;
 
 /**
- * Class DatabaseTransactions.
+ * Trait DatabaseTransactions.
  */
 trait DatabaseTransactions
 {
@@ -21,12 +21,17 @@ trait DatabaseTransactions
     public function beginDatabaseTransaction()
     {
         $database = $this->app->make('db');
+
         foreach ($this->connectionsToTransact() as $name) {
             $database->connection($name)->beginTransaction();
         }
+
         $this->beforeApplicationDestroyed(function () use ($database) {
             foreach ($this->connectionsToTransact() as $name) {
-                $database->connection($name)->rollBack();
+                $connection = $database->connection($name);
+
+                $connection->rollBack();
+                $connection->disconnect();
             }
         });
     }
@@ -38,6 +43,7 @@ trait DatabaseTransactions
      */
     protected function connectionsToTransact()
     {
-        return property_exists($this, 'connectionsToTransact') ? $this->connectionsToTransact : [null];
+        return property_exists($this, 'connectionsToTransact')
+            ? $this->connectionsToTransact : [null];
     }
 }

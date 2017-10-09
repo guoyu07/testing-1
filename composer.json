@@ -1,0 +1,32 @@
+{
+    "name": "notadd/testing",
+    "description": "The Notadd Foundation Framework Testing Component.",
+    "keywords": ["notadd", "cms", "foundation", "framework", "testing"],
+    "homepage": "https://notadd.com",
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "twilroad",
+            "email": "heshudong@ibenchu.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Notadd\\Foundation\\Testing\\": "src/"
+        }
+    },
+    "autoload-dev": {
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.1-dev"
+        }
+    },
+    "require": {
+        "php": ">=7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~6.0"
+    },
+    "minimum-stability": "dev"
+}

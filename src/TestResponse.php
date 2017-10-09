@@ -618,8 +618,6 @@ class TestResponse
 
     /**
      * Dump the content from the response.
-     *
-     * @return void
      */
     public function dump()
     {

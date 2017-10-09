@@ -35,8 +35,6 @@ trait InteractsWithAuthentication
      *
      * @param \Illuminate\Contracts\Auth\Authenticatable $user
      * @param string|null                                $driver
-     *
-     * @return void
      */
     public function be(UserContract $user, $driver = null)
     {
@@ -87,7 +85,7 @@ trait InteractsWithAuthentication
     /**
      * Assert that the user is authenticated as the given user.
      *
-     * @param             $user
+     * @param            $user
      * @param string|null $guard
      *
      * @return $this

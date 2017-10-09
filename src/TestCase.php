@@ -68,8 +68,6 @@ abstract class TestCase extends BaseTestCase
 
     /**
      * Setup the test environment.
-     *
-     * @return void
      */
     protected function setUp()
     {
@@ -87,8 +85,6 @@ abstract class TestCase extends BaseTestCase
 
     /**
      * Refresh the application instance.
-     *
-     * @return void
      */
     protected function refreshApplication()
     {
@@ -124,8 +120,6 @@ abstract class TestCase extends BaseTestCase
 
     /**
      * Clean up the testing environment before the next test.
-     *
-     * @return void
      */
     protected function tearDown()
     {
@@ -160,9 +154,7 @@ abstract class TestCase extends BaseTestCase
     /**
      * Register a callback to be run after the application is created.
      *
-     * @param  callable $callback
-     *
-     * @return void
+     * @param callable $callback
      */
     public function afterApplicationCreated(callable $callback)
     {
@@ -175,9 +167,7 @@ abstract class TestCase extends BaseTestCase
     /**
      * Register a callback to be run before the application is destroyed.
      *
-     * @param  callable $callback
-     *
-     * @return void
+     * @param callable $callback
      */
     protected function beforeApplicationDestroyed(callable $callback)
     {

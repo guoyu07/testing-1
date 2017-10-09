@@ -130,10 +130,8 @@ trait InteractsWithExceptionHandling
                 /**
                  * Render the exception for the console.
                  *
-                 * @param \Symfony\Component\Console\Output\OutputInterface
-                 * @param \Exception $e
-                 *
-                 * @return void
+                 * @param \Symfony\Component\Console\Output\OutputInterface $output
+                 * @param \Exception                                        $e
                  */
                 public function renderForConsole($output, Exception $e)
                 {

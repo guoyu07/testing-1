@@ -23,7 +23,6 @@ use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
  */
 trait MakesHttpRequests
 {
-    use InteractsWithPages;
 
     /**
      * The last response returned by the application.

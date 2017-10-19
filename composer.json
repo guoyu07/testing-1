@@ -26,6 +26,7 @@
         "php": ">=7.0"
     },
     "require-dev": {
+        "laravel/dusk": "2.0.*",
         "phpunit/phpunit": "~6.0"
     },
     "minimum-stability": "dev"

@@ -9,11 +9,11 @@
 namespace Notadd\Foundation\Testing;
 
 use Exception;
-use Laravel\Dusk\Console\ComponentCommand;
-use Laravel\Dusk\Console\DuskCommand;
-use Laravel\Dusk\Console\InstallCommand;
-use Laravel\Dusk\Console\MakeCommand;
-use Laravel\Dusk\Console\PageCommand;
+//use Laravel\Dusk\Console\ComponentCommand;
+//use Laravel\Dusk\Console\DuskCommand;
+//use Laravel\Dusk\Console\InstallCommand;
+//use Laravel\Dusk\Console\MakeCommand;
+//use Laravel\Dusk\Console\PageCommand;
 use Notadd\Foundation\Http\Abstracts\ServiceProvider;
 
 /**
@@ -26,18 +26,18 @@ class TestingServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $this->app->make('router')->get('/_dusk/login/{userId}/{guard?}', [
-            'middleware' => 'web',
-            'uses'       => 'Laravel\Dusk\Http\Controllers\UserController@login',
-        ]);
-        $this->app->make('router')->get('/_dusk/logout/{guard?}', [
-            'middleware' => 'web',
-            'uses'       => 'Laravel\Dusk\Http\Controllers\UserController@logout',
-        ]);
-        $this->app->make('router')->get('/_dusk/user/{guard?}', [
-            'middleware' => 'web',
-            'uses'       => 'Laravel\Dusk\Http\Controllers\UserController@user',
-        ]);
+//        $this->app->make('router')->get('/_dusk/login/{userId}/{guard?}', [
+//            'middleware' => 'web',
+//            'uses'       => 'Laravel\Dusk\Http\Controllers\UserController@login',
+//        ]);
+//        $this->app->make('router')->get('/_dusk/logout/{guard?}', [
+//            'middleware' => 'web',
+//            'uses'       => 'Laravel\Dusk\Http\Controllers\UserController@logout',
+//        ]);
+//        $this->app->make('router')->get('/_dusk/user/{guard?}', [
+//            'middleware' => 'web',
+//            'uses'       => 'Laravel\Dusk\Http\Controllers\UserController@user',
+//        ]);
     }
 
     /**
@@ -47,14 +47,14 @@ class TestingServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                InstallCommand::class,
-                DuskCommand::class,
-                MakeCommand::class,
-                PageCommand::class,
-                ComponentCommand::class,
-            ]);
-        }
+//        if ($this->app->runningInConsole()) {
+//            $this->commands([
+//                InstallCommand::class,
+//                DuskCommand::class,
+//                MakeCommand::class,
+//                PageCommand::class,
+//                ComponentCommand::class,
+//            ]);
+//        }
     }
 }
